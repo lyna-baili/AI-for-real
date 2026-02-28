@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AQUA-SENTINEL — Digital Twin Water Network</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Exo+2:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="index2.css">
+
+
+<body>
+
+<!-- HUD HEADER -->
+<header class="hud-header">
+  <div class="brand fade-in d1">
+    <div class="brand-logo">💧</div>
+    <div>
+      <div class="brand-text">AQUA-<span>SENTINEL</span></div>
+      <div class="brand-sub">Digital Twin Water Network · v2.1</div>
+    </div>
+  </div>
+  <div class="hud-center fade-in d2">
+    <div class="mode-btn active">Live</div>
+    <div class="mode-btn" onclick="toggleMode(this)">Replay</div>
+    <div class="mode-btn" onclick="toggleMode(this)">Simulate</div>
+    <div class="mode-btn" onclick="toggleMode(this)">3D City</div>
+  </div>
+  <div class="hud-right fade-in d3">
+    <div class="hud-stat">
+      <div class="hud-stat-val safe" id="hdNodes">12/14</div>
+      <div class="hud-stat-lbl">Nodes Safe</div>
+    </div>
+    <div class="hud-stat">
+      <div class="hud-stat-val warn" id="hdRisk">62</div>
+      <div class="hud-stat-lbl">Risk Index</div>
+    </div>
+    <div class="hud-stat">
+      <div class="hud-stat-val danger">2</div>
+      <div class="hud-stat-lbl">Critical</div>
+    </div>
+    <div class="live-ind">
+      <div class="live-dot"></div>
+      LIVE
+    </div>
+  </div>
+</header>
+
+<!-- MAIN BODY -->
+<div class="main-body">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+
+    <!-- Risk Gauge -->
+    <div class="lp-section fade-in d2">
+      <div class="lp-title">Water Quality Risk Index</div>
+      <div class="risk-gauge-wrap">
+        <canvas id="mainGauge" width="220" height="130"></canvas>
+        <div class="risk-score-display">
+          <div class="risk-score-num" id="riskNum">62</div>
+          <div class="risk-score-label" id="riskLbl">⚠ MODERATE RISK</div>
+        </div>
+        <div class="risk-bar-wrap" style="margin-top:10px">
+          <div class="risk-bar-fill" id="riskBarFill" style="width:62%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:3px;font-family:var(--font-hud);font-size:0.5rem;color:var(--muted);">
+          <span>SAFE</span><span>MODERATE</span><span>HIGH</span><span>CRITICAL</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sensors -->
+    <div class="lp-section fade-in d3">
+      <div class="lp-title">Node C-4 Sensors</div>
+      <div class="sensor-mini warn">
+        <div class="sm-name">🧪 pH Level</div>
+        <div class="sm-right">
+          <div class="sm-val" id="s-ph">8.4</div>
+          <div class="sm-unit">pH · WARN</div>
+        </div>
+      </div>
+      <div class="sensor-mini crit">
+        <div class="sm-name">🌊 Turbidity</div>
+        <div class="sm-right">
+          <div class="sm-val" id="s-turb">4.8</div>
+          <div class="sm-unit">NTU · CRIT</div>
+        </div>
+      </div>
+      <div class="sensor-mini crit">
+        <div class="sm-name">⚗️ Chlorine</div>
+        <div class="sm-right">
+          <div class="sm-val" id="s-cl">0.08</div>
+          <div class="sm-unit">mg/L · CRIT</div>
+        </div>
+      </div>
+      <div class="sensor-mini ok">
+        <div class="sm-name">⚡ Conductivity</div>
+        <div class="sm-right">
+          <div class="sm-val" id="s-cond">312</div>
+          <div class="sm-unit">µS/cm · OK</div>
+        </div>
+      </div>
+      <div class="sensor-mini ok">
+        <div class="sm-name">🌡️ Temperature</div>
+        <div class="sm-right">
+          <div class="sm-val" id="s-temp">21.3</div>
+          <div class="sm-unit">°C · OK</div>
+        </div>
+      </div>
+      <div class="sensor-mini warn">
+        <div class="sm-name">📉 Pressure</div>
+        <div class="sm-right">
+          <div class="sm-val" id="s-pres">2.1</div>
+          <div class="sm-unit">bar · WARN</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Cause -->
+    <div class="lp-section fade-in d4">
+      <div class="lp-title">AI Cause Attribution (SHAP)</div>
+      <div class="cause-item">
+        <div class="cause-header">
+          <span class="cause-name">💧 Chlorine depletion</span>
+          <span class="cause-pct">41%</span>
+        </div>
+        <div class="cause-bg"><div class="cause-fill" data-w="41" style="width:0;background:linear-gradient(90deg,#ff3355,#ff6677)"></div></div>
+      </div>
+      <div class="cause-item">
+        <div class="cause-header">
+          <span class="cause-name">🌊 High turbidity</span>
+          <span class="cause-pct">28%</span>
+        </div>
+        <div class="cause-bg"><div class="cause-fill" data-w="28" style="width:0;background:linear-gradient(90deg,#ffb800,#ffd055)"></div></div>
+      </div>
+      <div class="cause-item">
+        <div class="cause-header">
+          <span class="cause-name">📉 Pressure drop</span>
+          <span class="cause-pct">18%</span>
+        </div>
+        <div class="cause-bg"><div class="cause-fill" data-w="18" style="width:0;background:linear-gradient(90deg,#ffb800,#ffd055)"></div></div>
+      </div>
+      <div class="cause-item">
+        <div class="cause-header">
+          <span class="cause-name">⚗️ pH deviation</span>
+          <span class="cause-pct">9%</span>
+        </div>
+        <div class="cause-bg"><div class="cause-fill" data-w="9" style="width:0;background:linear-gradient(90deg,#00ffcc,#00aaff)"></div></div>
+      </div>
+      <div class="cause-item">
+        <div class="cause-header">
+          <span class="cause-name">🕐 Stagnation</span>
+          <span class="cause-pct">4%</span>
+        </div>
+        <div class="cause-bg"><div class="cause-fill" data-w="4" style="width:0;background:linear-gradient(90deg,#00ffcc,#00aaff)"></div></div>
+      </div>
+    </div>
+
+    <!-- AI Recommendation -->
+    <div class="lp-section fade-in d5">
+      <div class="lp-title">AI Recommendation</div>
+      <div style="background:rgba(0,255,204,0.05);border:1px solid rgba(0,255,204,0.15);border-radius:6px;padding:10px;font-size:0.72rem;line-height:1.5;">
+        <div style="color:var(--safe);font-family:var(--font-hud);font-size:0.6rem;margin-bottom:5px;">AUTO-GENERATED · CONFIDENCE 87%</div>
+        <div style="color:var(--white);">Flush segment C4→J7, inject chlorine booster at junction J-7. Close valve V-3 for 20 min.</div>
+        <div style="color:var(--safe);font-family:var(--font-hud);font-size:0.6rem;margin-top:6px;">IMPACT: Risk −34pts in ~45 min</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CENTER: 3D CANVAS -->
+  <div class="canvas-area">
+    <canvas id="cityCanvas"></canvas>
+    <div class="scan-line"></div>
+    <div class="corner-tl"></div>
+    <div class="corner-tr"></div>
+    <div class="corner-bl"></div>
+    <div class="corner-br"></div>
+
+    <button class="whatif-btn" onclick="document.getElementById('whatifModal').classList.add('open')">
+      ⚡ WHAT IF ?
+    </button>
+
+    <!-- Tooltip -->
+    <div class="node-tooltip" id="nodeTooltip">
+      <div class="nt-name" id="tt-name">NODE C-4</div>
+      <div class="nt-row"><span class="nt-key">Risk Index</span><span class="nt-val warn" id="tt-risk">62</span></div>
+      <div class="nt-row"><span class="nt-key">Chlorine</span><span class="nt-val danger" id="tt-cl">0.08 mg/L</span></div>
+      <div class="nt-row"><span class="nt-key">Turbidity</span><span class="nt-val danger" id="tt-turb">4.8 NTU</span></div>
+      <div class="nt-row"><span class="nt-key">Status</span><span class="nt-val warn" id="tt-status">MODERATE</span></div>
+    </div>
+
+    <!-- Time Slider -->
+    <div class="time-slider-wrap">
+      <div class="ts-label">
+        <span>◀ PAST — 6H</span>
+        <span id="sliderTime">NOW <span>→ LIVE</span></span>
+        <span>FORECAST +6H ▶</span>
+      </div>
+      <input type="range" class="time-range" id="timeSlider" min="-360" max="360" value="0" oninput="onSliderChange(this.value)">
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+
+    <!-- Propagation -->
+    <div class="rp-section fade-in d2">
+      <div class="rp-title">Contamination Propagation</div>
+      <div class="prop-item active">
+        <div class="prop-node">C-4</div>
+        <div class="prop-info">
+          <div class="prop-name">Industrial Zone</div>
+          <div class="prop-time">NOW — Origin</div>
+        </div>
+        <div class="prop-badge">ORIGIN</div>
+      </div>
+      <div class="prop-item incoming">
+        <div class="prop-node">B-3</div>
+        <div class="prop-info">
+          <div class="prop-name">Commercial Hub</div>
+          <div class="prop-time">+ 12 min</div>
+        </div>
+        <div class="prop-badge">INCOMING</div>
+      </div>
+      <div class="prop-item incoming">
+        <div class="prop-node">SCH</div>
+        <div class="prop-info">
+          <div class="prop-name">⚠ School — Zone 4</div>
+          <div class="prop-time">+ 28 min</div>
+        </div>
+        <div class="prop-badge">ALERT</div>
+      </div>
+      <div class="prop-item incoming">
+        <div class="prop-node">D-1</div>
+        <div class="prop-info">
+          <div class="prop-name">🏥 Hospital Nord</div>
+          <div class="prop-time">+ 45 min</div>
+        </div>
+        <div class="prop-badge">ALERT</div>
+      </div>
+      <div class="prop-item safe">
+        <div class="prop-node">E-2</div>
+        <div class="prop-info">
+          <div class="prop-name">Residential West</div>
+          <div class="prop-time">Not affected</div>
+        </div>
+        <div class="prop-badge">SAFE</div>
+      </div>
+    </div>
+
+    <!-- LLM Alerts -->
+    <div class="rp-section fade-in d3">
+      <div class="rp-title">LLM Auto-Generated Alerts</div>
+      <div class="llm-msg tech">
+        <div class="llm-tag">📱 TECHNICIAN SMS</div>
+        <div class="llm-text">Flush C4→J7 now. Cl: 0.08mg/L (crit). Inject booster at J-7. Close V-3. ETA fix: 45min.</div>
+      </div>
+      <div class="llm-msg gov">
+        <div class="llm-tag">📧 MUNICIPALITY EMAIL</div>
+        <div class="llm-text">Moderate risk detected in Zone Nord-Est (C-4). AI recommends preventive intervention. No public alert required at this time.</div>
+      </div>
+      <div class="llm-msg pub">
+        <div class="llm-tag">🔔 SCHOOL NOTIFICATION</div>
+        <div class="llm-text">Water quality is safe. Enhanced monitoring is active in your area. No action needed from your side.</div>
+      </div>
+    </div>
+
+    <!-- 6h Forecast -->
+    <div class="rp-section fade-in d4">
+      <div class="rp-title">6-Hour Risk Forecast (LSTM)</div>
+      <div class="forecast-row">
+        <div class="fc-time">NOW</div>
+        <div class="fc-bar-bg"><div class="fc-bar-fill" data-w="62" style="width:0;background:linear-gradient(90deg,#ffb800,#ffd055)">62</div></div>
+      </div>
+      <div class="forecast-row">
+        <div class="fc-time">+1h</div>
+        <div class="fc-bar-bg"><div class="fc-bar-fill" data-w="68" style="width:0;background:linear-gradient(90deg,#ffb800,#ffd055)">68</div></div>
+      </div>
+      <div class="forecast-row">
+        <div class="fc-time">+2h</div>
+        <div class="fc-bar-bg"><div class="fc-bar-fill" data-w="74" style="width:0;background:linear-gradient(90deg,#ff6600,#ff8833)">74</div></div>
+      </div>
+      <div class="forecast-row">
+        <div class="fc-time">+3h</div>
+        <div class="fc-bar-bg"><div class="fc-bar-fill" data-w="78" style="width:0;background:linear-gradient(90deg,#ff3355,#ff5577)">78</div></div>
+      </div>
+      <div class="forecast-row">
+        <div class="fc-time">+4h</div>
+        <div class="fc-bar-bg"><div class="fc-bar-fill" data-w="82" style="width:0;background:linear-gradient(90deg,#ff3355,#ff5577)">82</div></div>
+      </div>
+      <div class="forecast-row">
+        <div class="fc-time">+6h*</div>
+        <div class="fc-bar-bg"><div class="fc-bar-fill" data-w="41" style="width:0;background:linear-gradient(90deg,#00ffcc,#00ddaa)">41</div></div>
+      </div>
+      <div style="font-size:0.6rem;font-family:var(--font-hud);color:var(--muted);margin-top:4px;">* After recommended intervention</div>
+    </div>
+
+    <!-- Model info -->
+    <div class="rp-section fade-in d5">
+      <div class="rp-title">AI Model Stack</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <div style="background:var(--b1);border-radius:5px;padding:8px;text-align:center;">
+          <div style="font-family:var(--font-hud);font-size:0.9rem;color:var(--safe);">94.2%</div>
+          <div style="font-size:0.58rem;color:var(--muted2);font-family:var(--font-hud);">ACCURACY</div>
+        </div>
+        <div style="background:var(--b1);border-radius:5px;padding:8px;text-align:center;">
+          <div style="font-family:var(--font-hud);font-size:0.9rem;color:var(--safe);">38ms</div>
+          <div style="font-size:0.58rem;color:var(--muted2);font-family:var(--font-hud);">LATENCY</div>
+        </div>
+        <div style="background:var(--b1);border-radius:5px;padding:8px;text-align:center;">
+          <div style="font-family:var(--font-hud);font-size:0.9rem;color:var(--info);">GNN</div>
+          <div style="font-size:0.58rem;color:var(--muted2);font-family:var(--font-hud);">GRAPH NET</div>
+        </div>
+        <div style="background:var(--b1);border-radius:5px;padding:8px;text-align:center;">
+          <div style="font-family:var(--font-hud);font-size:0.9rem;color:var(--info);">LSTM</div>
+          <div style="font-size:0.58rem;color:var(--muted2);font-family:var(--font-hud);">FORECAST</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- WHAT IF MODAL -->
+<div class="modal-overlay" id="whatifModal">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span>⚡ WHAT IF SIMULATOR</span>
+      <span class="modal-close" onclick="document.getElementById('whatifModal').classList.remove('open')">✕</span>
+    </div>
+    <div style="font-size:0.7rem;color:var(--muted2);margin-bottom:12px;font-family:var(--font-hud);">Simulate intervention scenarios:</div>
+    <div class="what-option" onclick="applyWhatIf('flush')">
+      <div class="what-icon">🚿</div>
+      <div class="what-text">
+        <div class="what-name">Flush Pipeline C4→J7</div>
+        <div class="what-detail">Emergency pipe flush, 20 minutes</div>
+      </div>
+      <div class="what-result">−34 pts</div>
+    </div>
+    <div class="what-option" onclick="applyWhatIf('chlorine')">
+      <div class="what-icon">⚗️</div>
+      <div class="what-text">
+        <div class="what-name">Inject Chlorine Booster</div>
+        <div class="what-detail">Junction J-7, dose +0.3 mg/L</div>
+      </div>
+      <div class="what-result">−22 pts</div>
+    </div>
+    <div class="what-option" onclick="applyWhatIf('valve')">
+      <div class="what-icon">🔧</div>
+      <div class="what-text">
+        <div class="what-name">Close Valve V-3</div>
+        <div class="what-detail">Isolate contaminated segment</div>
+      </div>
+      <div class="what-result">−18 pts</div>
+    </div>
+    <div class="what-option" onclick="applyWhatIf('all')">
+      <div class="what-icon">✅</div>
+      <div class="what-text">
+        <div class="what-name">Apply All Interventions</div>
+        <div class="what-detail">Full protocol — optimal outcome</div>
+      </div>
+      <div class="what-result" style="color:var(--safe);">−41 pts</div>
+    </div>
+  </div>
+</div>
+
+<script src="index3.js"></script>
+
+</body>
+</html>
